@@ -1,5 +1,4 @@
 import os
-import yaml
 from pathlib import Path
 
 def load_data(data_dir: str):
@@ -20,9 +19,23 @@ def load_data(data_dir: str):
         print(f"Error: No se encontró el archivo de configuración data.yaml en {data_path}")
         return None
 
-    # Leer configuración YAML
-    with open(yaml_file, 'r') as f:
-        config = yaml.safe_load(f)
+    # Leer configuración sin requerir la librería yaml
+    config = {}
+    with open(yaml_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        names = []
+        in_names = False
+        for line in lines:
+            line = line.strip()
+            if line.startswith('nc:'):
+                config['nc'] = int(line.split(':')[1].strip())
+            elif line.startswith('names:'):
+                in_names = True
+            elif in_names and line.startswith('-'):
+                names.append(line.replace('-', '').strip())
+            elif in_names and ':' in line:
+                in_names = False
+        config['names'] = names
         
     print("\n--- Resumen del Dataset ---")
     print(f"Número de clases: {config.get('nc', 'Desconocido')}")
