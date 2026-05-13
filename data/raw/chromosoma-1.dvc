@@ -3,4 +3,4 @@ outs:
   size: 178805783
   nfiles: 9994
   hash: md5
-  path: chromosoma-1
+  path: data/raw/chromosoma-1
