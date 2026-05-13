@@ -1,0 +1,6 @@
+outs:
+- md5: 8397031be056d9cd5e12a54b04c1ff9f.dir
+  size: 178805783
+  nfiles: 9994
+  hash: md5
+  path: data/raw/chromosoma-1
