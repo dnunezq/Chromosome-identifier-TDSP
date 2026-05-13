@@ -1,10 +1,16 @@
-# Team Data Science Project Template
+# Chromosome Identifier - TDSP
 
-Esta plantilla es una implementación de la plantilla de proyecto de Team Data Science Process que actualmente se utiliza en el "Programa de Formación en Machine Learning y Data Science" en la Universidad Nacional de Colombia.
+## Contexto del Proyecto
 
-Esta plantilla proporciona las siguientes carpetas y archivos:
+Este proyecto implementa un modelo de red neuronal para identificar y clasificar cromosomas en imágenes de células en metafase. La identificación de cromosomas es fundamental en la investigación genética y el diagnóstico clínico para la detección de trastornos genéticos y el cuidado prenatal. Los métodos manuales tradicionales son confiables pero laboriosos y consumen mucho tiempo.
 
-* `src`: acá debe ir el código o implementación del proyecto en Python.
-* `docs`: en esta carpeta se encuentran las plantillas de los documentos definidos en la metodología.
-* `scripts`: esta carpeta debe contener los scripts/notebooks que se ejecutarán.
-* `pyproject.toml`: archivo de definición del proyecto en Python.
+Automatizar este proceso de detección y clasificación mediante redes neuronales busca mejorar significativamente la eficiencia del análisis cromosómico en entornos médicos, permitiendo diagnósticos más rápidos y precisos.
+
+## Estructura del Proyecto (TDSP)
+
+Esta estructura es una implementación de la metodología Team Data Science Process (TDSP) que proporciona las siguientes carpetas y archivos:
+
+* `src`: Acá debe ir el código o implementación del proyecto en Python.
+* `docs`: En esta carpeta se encuentran las plantillas de los documentos definidos en la metodología, adaptados para este proyecto.
+* `scripts`: Esta carpeta debe contener los scripts/notebooks que se ejecutarán (ej. adquisición de datos, procesamiento).
+* `pyproject.toml`: Archivo de definición del paquete/proyecto en Python.
