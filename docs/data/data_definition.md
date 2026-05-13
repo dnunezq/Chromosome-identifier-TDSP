@@ -6,11 +6,11 @@ Los datos provienen del artículo *"An Open Dataset of Annotated Metaphase Cell 
 
 ## Especificación de los scripts para la carga de datos
 
-- Se utiliza el script `scripts/data_acquisition/main.py` para cargar e inspeccionar localmente los datos, validando la configuración en el archivo `data.yaml` y contabilizando el número de imágenes disponibles en cada subconjunto (train, valid, test). 
+- Se utiliza el notebook `scripts/data_acquisition/data_acquisition.ipynb` para cargar e inspeccionar localmente los datos, validando la configuración en el archivo `data.yaml`, contabilizando el número de imágenes disponibles y visualizando ejemplos aleatorios del dataset con sus respectivas anotaciones (bounding boxes).
 
 ## Referencias a rutas o bases de datos origen y destino
 
-El proyecto actualmente maneja los datos de forma local en el sistema de archivos, sin una base de datos relacional externa.
+El proyecto actualmente maneja los datos de forma local en el sistema de archivos, versionados mediante DVC (Data Version Control), sin una base de datos relacional externa.
 
 ### Rutas de origen de datos
 
@@ -19,10 +19,10 @@ El proyecto actualmente maneja los datos de forma local en el sistema de archivo
   - El directorio contiene un archivo `data.yaml` con la definición de las 24 clases de cromosomas.
   - Existen tres carpetas principales: `train/`, `valid/` y `test/`.
   - Dentro de cada una de estas, hay carpetas de `images/` (contienen las imágenes de células en metafase) y `labels/` (contienen archivos `.txt` con las coordenadas de las cajas delimitadoras para cada imagen).
-- **Procedimientos de transformación y limpieza (origen):** Inicialmente, el dataset ya viene redimensionado (640x640) y pre-dividido por la herramienta Roboflow. El preprocesamiento adicional (como normalización de imágenes) se realizará en las fases posteriores de entrenamiento.
+- **Procedimientos de transformación y limpieza (origen):** Inicialmente, el dataset ya viene redimensionado (640x640) y pre-dividido. El preprocesamiento adicional se realizará en las fases de modelado.
 
 ### Base de datos de destino
 
-- **Especificación:** No aplica. Los datos se mantienen estructurados en carpetas dentro del repositorio local/entorno de entrenamiento.
+- **Especificación:** No aplica. Los datos se mantienen estructurados en carpetas locales gestionadas por DVC.
 - **Estructura:** Sistema de archivos estándar.
 - **Procedimientos de carga:** Los datos son leídos directamente por los DataLoaders de la red neuronal durante el entrenamiento a partir de la ruta local `data/raw/chromosoma-1/`.
