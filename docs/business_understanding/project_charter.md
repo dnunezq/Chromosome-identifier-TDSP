@@ -47,6 +47,8 @@ Team Data Science Process (TDSP) adaptada para un problema de Visión Computacio
 ## Equipo del Proyecto
 
 - **Líder del Proyecto y Científico de Datos:** David Alexander Núñez Quintero
+- **Científico de Datos:** Sebastian Rodriguez Ardila
+- **Científico de Datos:** Nicolas Suarez Gutierrez
 
 ## Presupuesto
 
