@@ -7,3 +7,9 @@ matplotlib
 
 # Control de versiones de datos
 dvc
+
+# Modelado y Deep Learning
+torch
+ultralytics
+
+pandas
