@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karyotype & Chromosome Explorer</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --bg-color: #f4f6f8;
+            --panel-bg: #ffffff;
+            --border-radius: 8px;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg-color);
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.8rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        .upload-section {
+            grid-column: 1 / -1;
+            background: var(--panel-bg);
+            border: 2px dashed #bdc3c7;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary);
+            background: #fdfdfd;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #bdc3c7;
+            margin-bottom: 10px;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+
+        .canvas-container {
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            background: #eee;
+            border-radius: var(--border-radius);
+        }
+
+        canvas { 
+            max-width: 100%; 
+            height: auto;
+            cursor: crosshair; 
+        }
+
+        .hidden { display: none !important; }
+
+        .loader {
+            border: 4px solid #f3f3f3; 
+            border-top: 4px solid var(--primary); 
+            border-radius: 50%; 
+            width: 40px; height: 40px; 
+            animation: spin 1s linear infinite; 
+            margin: 20px auto;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Status Banner */
+        .status-banner {
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+
+        .status-banner.normal { background: #e8f8f5; color: #27ae60; border: 1px solid #2ecc71; }
+        .status-banner.abnormal { background: #fdedec; color: #c0392b; border: 1px solid #e74c3c; }
+
+        /* Stats & Details */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card h4 { margin: 0 0 5px 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
+        .stat-card .value { font-size: 1.5rem; font-weight: bold; color: #2c3e50; }
+
+        .group-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .group-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .group-item:hover, .group-item.active { background: #e3f2fd; }
+        .group-item:last-child { border-bottom: none; }
+        .group-badge {
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        
+        .anomaly-badge { background: var(--danger) !important; }
+
+        h3 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; color: #2c3e50;}
+        
+        .interactive-info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            min-height: 100px;
+        }
+
+        .btn-reset {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-reset:hover {
+            background-color: #2980b9;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Karyotype & Chromosome Explorer</h1>
+    </div>
+
+    <div class="container">
+        <!-- Uploader -->
+        <div class="upload-section" id="drop-area" onclick="document.getElementById('file-input').click()">
+            <div class="upload-icon">📁</div>
+            <h2>Click or drop an image here (and optionally a .txt annotation file)</h2>
+            <p style="color: #7f8c8d;">Supported formats: JPEG, PNG, TXT (YOLO format)</p>
+            <p style="color: #bdc3c7; font-size: 0.85rem; margin-top: 5px;">You can select/drag both the image and the .txt file together to compare.</p>
+            <input type="file" id="file-input" accept="image/jpeg, image/png, image/jpg, .txt" multiple class="hidden">
+        </div>
+
+        <div id="loading" class="loader hidden" style="grid-column: 1/-1;"></div>
+
+        <!-- Left Column: Canvas -->
+        <div class="panel hidden" id="canvas-panel">
+            <h3>Visual Analysis</h3>
+            <div class="canvas-container">
+                <canvas id="image-canvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Right Column: Diagnostics -->
+        <div class="hidden" id="analytics-panel">
+            
+            <div id="status-banner" class="status-banner normal">
+                <span id="status-icon">✅</span>
+                <span id="status-text">Normal Karyotype Detected (46 Chromosomes)</span>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Total Chromosomes Detected</h4>
+                    <div class="value" id="total-count">0</div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 20px;">
+                <h3>Display Options</h3>
+                <div style="display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold;">
+                        <input type="checkbox" id="show-ai-cb" checked style="width: 16px; height: 16px;">
+                        <span style="display:inline-block; width:12px; height:12px; background:rgba(46, 204, 113, 0.5); border:2px solid #2ecc71;"></span> AI Predictions
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold;">
+                        <input type="checkbox" id="show-gt-cb" checked style="width: 16px; height: 16px;">
+                        <span style="display:inline-block; width:12px; height:12px; border:2px dashed #9b59b6;"></span> Ground Truth (.txt)
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 20px;">
+                <h3>Interaction Details</h3>
+                <div id="segment-info" class="interactive-info">
+                    ✨ <strong>Tip:</strong> Hover over the image to inspect individual chromosomes. Select a group below to highlight them.
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Chromosomes Grouping</h3>
+                <ul class="group-list" id="group-list">
+                    <!-- Dynamic clusters will appear here -->
+                </ul>
+            </div>
+            
+            <input type="file" id="late-txt-input" accept=".txt" class="hidden">
+            <button class="btn-reset" style="background-color:#9b59b6; margin-bottom: 10px;" onclick="document.getElementById('late-txt-input').click()">Load Ground Truth File (.txt)</button>
+            <button class="btn-reset" onclick="resetApp()" style="margin-top:0;">Upload Another Image</button>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const loading = document.getElementById('loading');
+        
+        const dropArea = document.getElementById('drop-area');
+        const canvasPanel = document.getElementById('canvas-panel');
+        const analyticsPanel = document.getElementById('analytics-panel');
+        const canvas = document.getElementById('image-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const statusBanner = document.getElementById('status-banner');
+        const statusIcon = document.getElementById('status-icon');
+        const statusText = document.getElementById('status-text');
+        const totalCountEl = document.getElementById('total-count');
+        const groupList = document.getElementById('group-list');
+        const segmentInfo = document.getElementById('segment-info');
+        
+        let currentPredictions = [];
+        let currentGroundTruth = [];
+        let currentImage = new Image();
+        let activeHoverClass = null;
+        let showAI = true;
+        let showGT = true;
+        let hoveredBoxes = [];
+
+        // --- File Upload Logic ---
+        function handleFiles(files) {
+            let imageFile = null;
+            let txtFile = null;
+
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].type.startsWith('image/') || files[i].name.match(/\.(jpg|jpeg|png)$/i)) {
+                    imageFile = files[i];
+                } else if (files[i].name.endsWith('.txt') || files[i].type === 'text/plain') {
+                    txtFile = files[i];
+                }
+            }
+
+            if (imageFile) {
+                uploadImageAndAnnotation(imageFile, txtFile);
+            } else {
+                alert("Please select at least an image file.");
+            }
+        }
+
+        document.getElementById('show-ai-cb').addEventListener('change', (e) => {
+            showAI = e.target.checked;
+            processAnalytics();
+            drawCanvas();
+        });
+
+        document.getElementById('show-gt-cb').addEventListener('change', (e) => {
+            showGT = e.target.checked;
+            if (showGT && currentGroundTruth.length === 0) {
+                alert("No Ground Truth data available. Please load a .txt file.");
+                e.target.checked = false;
+                showGT = false;
+                return;
+            }
+            processAnalytics();
+            drawCanvas();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFiles(e.target.files);
+        });
+        
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = "#3498db";
+        });
+        dropArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = "#bdc3c7";
+        });
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = "#bdc3c7";
+            if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
+        });
+
+        // Late txt upload logic
+        document.getElementById('late-txt-input').addEventListener('change', async (e) => {
+            if (e.target.files.length > 0 && currentImage.src) {
+                const file = e.target.files[0];
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('width', currentImage.width);
+                formData.append('height', currentImage.height);
+                
+                try {
+                    const response = await fetch('/parse_annotation', { method: 'POST', body: formData });
+                    const data = await response.json();
+                    if (data.success) {
+                        currentGroundTruth = data.ground_truth;
+                        document.getElementById('show-gt-cb').checked = true;
+                        showGT = true;
+                        processAnalytics();
+                        drawCanvas(); // Re-draw canvas with new ground truth superimposed
+                    } else {
+                        alert("Error parsing TXT: " + data.error);
+                    }
+                } catch (err) {
+                    alert('Request failed while loading TXT.');
+                }
+            }
+        });
+
+        async function uploadImageAndAnnotation(imageFile, txtFile) {
+            const formData = new FormData();
+            formData.append('file', imageFile);
+            
+            // UI Reset
+            dropArea.classList.add('hidden');
+            loading.classList.remove('hidden');
+            canvasPanel.classList.add('hidden');
+            analyticsPanel.classList.add('hidden');
+            activeHoverClass = null;
+            currentGroundTruth = [];
+            
+            try {
+                const response = await fetch('/predict', { method: 'POST', body: formData });
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentPredictions = data.predictions;
+                    if (data.ground_truth) {
+                        currentGroundTruth = data.ground_truth;
+                        showGT = true;
+                        document.getElementById('show-gt-cb').checked = true;
+                    } else {
+                        showGT = false;
+                        document.getElementById('show-gt-cb').checked = false;
+                    }
+                    currentImage.src = data.image_url;
+                    currentImage.onload = () => {
+                        // If user uploaded .txt simultaneously, parse it now that we have image dimensions
+                        if (txtFile) {
+                            const txtForm = new FormData();
+                            txtForm.append('file', txtFile);
+                            txtForm.append('width', currentImage.width);
+                            txtForm.append('height', currentImage.height);
+                            
+                            fetch('/parse_annotation', { method: 'POST', body: txtForm })
+                                .then(res => res.json())
+                                .then(txtData => {
+                                    if(txtData.success) {
+                                        currentGroundTruth = txtData.ground_truth;
+                                        showGT = true;
+                                        document.getElementById('show-gt-cb').checked = true;
+                                    }
+                                    finishLoading();
+                                }).catch(() => finishLoading());
+                        } else {
+                            finishLoading();
+                        }
+                    };
+
+                    function finishLoading() {
+                        processAnalytics();
+                        drawCanvas();
+                        loading.classList.add('hidden');
+                        canvasPanel.classList.remove('hidden');
+                        analyticsPanel.classList.remove('hidden');
+                    }
+                } else {
+                    alert('Error: ' + data.error);
+                    resetUI();
+                }
+            } catch (err) {
+                alert('Request failed. Check server connection.');
+                resetUI();
+            }
+        }
+
+        function resetUI() {
+            loading.classList.add('hidden');
+            dropArea.classList.remove('hidden');
+        }
+
+        function resetApp() {
+            canvasPanel.classList.add('hidden');
+            analyticsPanel.classList.add('hidden');
+            fileInput.value = '';
+            currentPredictions = [];
+            currentGroundTruth = [];
+            activeHoverClass = null;
+            document.getElementById('show-ai-cb').checked = true;
+            document.getElementById('show-gt-cb').checked = false; 
+            showAI = true;
+            showGT = false; 
+            hoveredBoxes = [];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            resetUI();
+        }
+
+        // --- Analytics & Grouping ---
+        function processAnalytics() {
+            let groupedAI = {};
+            let groupedGT = {};
+            let allClasses = new Set();
+            
+            if (showAI) {
+                currentPredictions.forEach(p => {
+                    groupedAI[p.class_name] = (groupedAI[p.class_name] || 0) + 1;
+                    allClasses.add(p.class_name);
+                });
+            }
+            if (showGT) {
+                currentGroundTruth.forEach(p => {
+                    groupedGT[p.class_name] = (groupedGT[p.class_name] || 0) + 1;
+                    allClasses.add(p.class_name);
+                });
+            }
+
+            let totalAI = currentPredictions.length;
+            let totalGT = currentGroundTruth.length;
+            
+            if (showAI && !showGT) {
+                totalCountEl.innerText = totalAI;
+                statusBanner.className = totalAI === 46 ? 'status-banner normal' : 'status-banner abnormal';
+                statusIcon.innerText = totalAI === 46 ? '✅' : '⚠️';
+                statusText.innerText = totalAI === 46 ? 'Normal AI Count (46)' : `Abnormal AI Count (${totalAI})`;
+            } else if (!showAI && showGT) {
+                totalCountEl.innerText = totalGT;
+                statusBanner.className = totalGT === 46 ? 'status-banner normal' : 'status-banner abnormal';
+                statusIcon.innerText = totalGT === 46 ? '✅' : '⚠️';
+                statusText.innerText = totalGT === 46 ? 'Normal GT Count (46)' : `Abnormal GT Count (${totalGT})`;
+            } else if (showAI && showGT) {
+                totalCountEl.innerText = `AI: ${totalAI} | GT: ${totalGT}`;
+                let normal = totalAI === 46 && totalGT === 46;
+                statusBanner.className = normal ? 'status-banner normal' : 'status-banner abnormal';
+                statusIcon.innerText = normal ? '✅' : '⚠️';
+                statusText.innerText = normal ? 'Normal Counts (46)' : `Abnormal Counts (AI: ${totalAI}, GT: ${totalGT})`;
+            } else {
+                totalCountEl.innerText = 0;
+                statusBanner.className = 'status-banner normal';
+                statusIcon.innerText = 'ℹ️';
+                statusText.innerText = 'No data displayed';
+            }
+
+            groupList.innerHTML = '';
+            const sortedClasses = Array.from(allClasses).sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+
+            sortedClasses.forEach(cName => {
+                const countAI = groupedAI[cName] || 0;
+                const countGT = groupedGT[cName] || 0;
+                const li = document.createElement('li');
+                li.className = 'group-item';
+                if (cName === activeHoverClass) li.style.background = '#e3f2fd';
+                
+                let badgesHTML = '';
+                if (showAI) {
+                    const isAnomalyAI = (countAI !== 2 && !['X', 'Y', 'chrX', 'chrY', 'X chromosome'].includes(cName));
+                    badgesHTML += `<span class="group-badge ${isAnomalyAI ? 'anomaly-badge' : ''}" style="background:#2ecc71; margin-left:5px;" title="AI Count">AI: ${countAI}</span>`;
+                }
+                if (showGT) {
+                    const isAnomalyGT = (countGT !== 2 && !['X', 'Y', 'chrX', 'chrY', 'X chromosome'].includes(cName));
+                    badgesHTML += `<span class="group-badge ${isAnomalyGT ? 'anomaly-badge' : ''}" style="background:#9b59b6; margin-left:5px;" title="GT Count">GT: ${countGT}</span>`;
+                }
+                
+                li.innerHTML = `
+                    <span>Class <strong>${cName}</strong></span>
+                    <div>${badgesHTML}</div>
+                `;
+                
+                li.addEventListener('click', () => {
+                    activeHoverClass = (activeHoverClass === cName) ? null : cName;
+                    processAnalytics(); // Update active highlight
+                    drawCanvas();
+                });
+
+                groupList.appendChild(li);
+            });
+        }
+
+        // --- Canvas Rendering & Interactivity ---
+        function drawCanvas() {
+            if (!currentImage.src) return;
+            canvas.width = currentImage.width;
+            canvas.height = currentImage.height;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(currentImage, 0, 0);
+
+            // 1. Draw Ground Truth boxes
+            if (showGT && currentGroundTruth) {
+                currentGroundTruth.forEach((gt) => {
+                    const [x1, y1, x2, y2] = gt.bbox;
+                    const isHighlight = activeHoverClass && gt.class_name === activeHoverClass;
+                    
+                    ctx.strokeStyle = isHighlight ? '#8e44ad' : '#9b59b6';
+                    ctx.setLineDash([5, 5]);
+                    ctx.lineWidth = isHighlight ? 4 : 2;
+                    ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+                    
+                    // Only draw labels statically if highlighted
+                    if (isHighlight) {
+                        ctx.font = '12px Arial';
+                        ctx.fillStyle = isHighlight ? '#8e44ad' : 'rgba(155, 89, 182, 0.7)';
+                        const text = gt.class_name + ' (GT)';
+                        ctx.fillRect(x1, y1 + 5, ctx.measureText(text).width + 10, 20);
+                        ctx.fillStyle = 'white';
+                        ctx.fillText(text, x1 + 5, y1 + 19);
+                    }
+                });
+                ctx.setLineDash([]);
+            }
+            
+            // 2. Draw AI Predictions
+            if (showAI && currentPredictions) {
+                currentPredictions.forEach((pred) => {
+                    const [x1, y1, x2, y2] = pred.bbox;
+                    const isHighlight = activeHoverClass && pred.class_name === activeHoverClass;
+                    
+                    let boxColor = isHighlight ? '#3498db' : '#2ecc71';
+                    
+                    ctx.strokeStyle = boxColor;
+                    ctx.lineWidth = isHighlight ? 4 : 2;
+                    ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+                    
+                    if (isHighlight) {
+                        ctx.font = '14px Arial';
+                        ctx.fillStyle = boxColor;
+                        const text = pred.class_name;
+                        ctx.fillRect(x1, y1 - 25, ctx.measureText(text).width + 10, 25);
+                        ctx.fillStyle = 'white';
+                        ctx.fillText(text, x1 + 5, y1 - 8);
+                    }
+                });
+            }
+            
+            // 3. Draw Hovered Boxes Effects & Update Segment Info
+            if (hoveredBoxes && hoveredBoxes.length > 0) {
+                let infoHTML = "";
+                hoveredBoxes.forEach(item => {
+                    const [bx1, by1, bx2, by2] = item.bbox;
+                    const isGt = item.type === 'gt';
+                    
+                    ctx.strokeStyle = '#e74c3c';
+                    ctx.fillStyle = 'rgba(231, 76, 60, 0.25)';
+                    ctx.lineWidth = 3;
+                    if(isGt) ctx.setLineDash([5, 5]);
+                    ctx.strokeRect(bx1, by1, bx2 - bx1, by2 - by1);
+                    ctx.fillRect(bx1, by1, bx2 - bx1, by2 - by1);
+                    ctx.setLineDash([]);
+                    
+                    const labelType = isGt ? 'Ground Truth' : 'AI Prediction';
+                    const confText = item.confidence ? `<strong>Confidence:</strong> ${(item.confidence * 100).toFixed(1)}%<br>` : '';
+                    
+                    infoHTML += `
+                        <div style="margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">
+                            <strong>${labelType}:</strong> ${item.class_name}<br>
+                            ${confText}
+                            <strong>Position:</strong> [${bx1.toFixed(0)}, ${by1.toFixed(0)}]
+                        </div>
+                    `;
+                });
+                segmentInfo.innerHTML = infoHTML;
+            } else {
+                if (activeHoverClass) {
+                    segmentInfo.innerHTML = `✨ <strong>Group Selected:</strong> ${activeHoverClass}. Click elsewhere to unselect.`;
+                } else {
+                    segmentInfo.innerHTML = "✨ <strong>Tip:</strong> Hover over the image to inspect individual chromosomes. Select a group below or click a bounding box to highlight them.";
+                }
+            }
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!currentImage.src) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            
+            let dataToInteract = [];
+            if (showGT) {
+                dataToInteract = dataToInteract.concat(currentGroundTruth.map(gt => ({...gt, type: 'gt'})));
+            }
+            if (showAI) {
+                dataToInteract = dataToInteract.concat(currentPredictions.map(p => ({...p, type: 'pred'})));
+            }
+            
+            hoveredBoxes = [];
+            for (let i = 0; i < dataToInteract.length; i++) {
+                const item = dataToInteract[i];
+                const [bx1, by1, bx2, by2] = item.bbox;
+                if (x >= bx1 && x <= bx2 && y >= by1 && y <= by2) {
+                    hoveredBoxes.push(item);
+                }
+            }
+            
+            drawCanvas();
+        });
+
+        canvas.addEventListener('click', (e) => {
+            if (!currentImage.src) return;
+            if (hoveredBoxes.length > 0) {
+                const targetClass = hoveredBoxes[hoveredBoxes.length - 1].class_name;
+                if (activeHoverClass === targetClass) {
+                    activeHoverClass = null; // Toggle off
+                } else {
+                    activeHoverClass = targetClass; // Toggle on
+                }
+                drawCanvas();
+            } else {
+                activeHoverClass = null;
+                drawCanvas();
+            }
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            hoveredBoxes = [];
+            if (currentImage.src) drawCanvas();
+        });
+    </script>
+</body>
+</html>
