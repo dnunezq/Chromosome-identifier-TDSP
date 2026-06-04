@@ -1,7 +1,7 @@
 torch
 ultralytics
 flask
+gunicorn
 werkzeug
 Pillow
-pandas
 opencv-python-headless
