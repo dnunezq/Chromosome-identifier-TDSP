@@ -1,20 +1,7 @@
-# Entorno de trabajo y notebooks
-ipykernel
-
-# Procesamiento y visualizacion de datos
-scikit-learn
-matplotlib
-
-# Control de versiones de datos
-dvc
-
-# Modelado y Deep Learning
 torch
 ultralytics
-
-pandas
-
 flask
 werkzeug
 Pillow
-gunicorn
+pandas
+opencv-python-headless
