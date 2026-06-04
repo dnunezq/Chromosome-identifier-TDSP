@@ -13,3 +13,7 @@ torch
 ultralytics
 
 pandas
+
+flask
+werkzeug
+Pillow

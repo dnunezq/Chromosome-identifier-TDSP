@@ -1,0 +1,25 @@
+# Python environment & cache
+__pycache__/
+*.pyc
+.venv/
+env/
+venv/
+.pytest_cache/
+
+# Version control
+.git/
+.gitignore
+
+# Data directories (avoid copying massive gigabytes of images)
+data/
+
+# DVC
+.dvc/
+*.dvc
+
+# Notebooks and scripts except the specific model file we need
+scripts/
+!scripts/training/runs/train/26m/yolo_vertex_exp-7/weights/best.pt
+
+# Documentation
+docs/
