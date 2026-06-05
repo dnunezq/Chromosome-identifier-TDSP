@@ -44,3 +44,22 @@
 - **Instrucciones de mantenimiento:**
   - **Actualización del modelo:** Reemplazar el archivo `best.pt` por la nueva versión entrenada y reconstruir la imagen Docker.
   - **Limpieza:** Como los archivos se guardan en `static/uploads/` internamente en el contenedor, se borrarán cada vez que se destruya el contenedor. Para persistirlos a futuro, se recomendaría montar un volumen externo.
+
+## Despliegue en Producción (Railway)
+
+Para el paso a producción, el repositorio está configurado para desplegarse fácilmente en plataformas como **Railway**.
+
+### Configuración del Servidor y Puertos
+- **Servidor WSGI:** En lugar del servidor de desarrollo nativo de Flask (que lanza advertencias y es inestable en producción), la aplicación se ejecuta mediante `gunicorn`. Esto se configuró en `requirements.txt` y en el `CMD` del `Dockerfile`. `gunicorn` es un servidor robusto, maneja concurrencia y tiene configurado un `timeout` alto (120 segundos) para evitar que la conexión se cierre mientras el modelo analiza las imágenes.
+- **Puertos Dinámicos:** En plataformas en la nube no se puede forzar un puerto estático (como el 5000). Por lo tanto, `app.py` y el `Dockerfile` están configurados para leer la variable de entorno `$PORT` que asigna Railway dinámicamente y enlazar la aplicación a dicho puerto.
+
+### Despliegue Automático
+El proceso de CI/CD es manejado nativamente por Railway:
+1. Al conectar el repositorio de GitHub a un nuevo proyecto en Railway, la plataforma detecta automáticamente el `Dockerfile`.
+2. Railway construye la imagen en la nube y despliega el contenedor sin necesidad de intervención manual.
+3. Cada vez que se hace un `push` a la rama conectada (como `main`), se desencadena un nuevo despliegue con "Zero-Downtime".
+
+### Costos y Capa Gratuita
+- Railway cuenta con un modelo de cobro por uso.
+- **Capa Gratuita (Hobby Plan):** Ofrecen un crédito inicial mensual gratuito (usualmente de $5 USD o alrededor de 500 horas de cómputo, dependiendo de la política vigente) que es más que suficiente para probar la aplicación pública y realizar presentaciones sin incurrir en gastos.
+- **Facturación:** Solo se consume crédito mientras el contenedor esté activo recibiendo peticiones o consumiendo RAM/CPU. Dado que el contenedor requiere unos 2GB de RAM para cargar el modelo de YOLO sin problemas, es recomendable estar pendiente de los créditos mensuales para evitar que el contenedor se detenga si se agotan.
