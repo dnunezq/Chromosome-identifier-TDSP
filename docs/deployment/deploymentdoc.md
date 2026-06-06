@@ -63,3 +63,9 @@ El proceso de CI/CD es manejado nativamente por Railway:
 - Railway cuenta con un modelo de cobro por uso.
 - **Capa Gratuita (Hobby Plan):** Ofrecen un crédito inicial mensual gratuito (usualmente de $5 USD o alrededor de 500 horas de cómputo, dependiendo de la política vigente) que es más que suficiente para probar la aplicación pública y realizar presentaciones sin incurrir en gastos.
 - **Facturación:** Solo se consume crédito mientras el contenedor esté activo recibiendo peticiones o consumiendo RAM/CPU. Dado que el contenedor requiere unos 2GB de RAM para cargar el modelo de YOLO sin problemas, es recomendable estar pendiente de los créditos mensuales para evitar que el contenedor se detenga si se agotan.
+
+### Acceso a la Aplicación
+La aplicación se encuentra actualmente en producción y es accesible públicamente a través del siguiente enlace:
+**[https://chromosome-identifier-tdsp-production.up.railway.app/](https://chromosome-identifier-tdsp-production.up.railway.app/)**
+
+> **Nota sobre el uso en producción:** Durante la experimentación se evidenció que el modelo tiene un comportamiento estable y rápido, aunque puede presentar fallos al no detectar ciertos cromosomas (clasificándolos erróneamente como fondo). Por esta razón, la aplicación está concebida como una **herramienta de insumo y apoyo** al proceso de identificación, más que como un sistema completamente autónomo.
