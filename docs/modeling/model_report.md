@@ -15,6 +15,11 @@ El proyecto aborda la tarea compleja de **Detección de Objetos**, donde el obje
 
 Para resolver el problema se optó por la arquitectura **YOLOv26 Medium (`yolo26m`)**. 
 *   **Metodología:** Se utilizó aprendizaje por transferencia (Transfer Learning) partiendo de pesos preentrenados, entrenando la red profunda con las imágenes redimensionadas a 640x640 píxeles y sus respectivas anotaciones.
+*   **Características de la Arquitectura YOLOv26:** Esta versión del detector introduce innovaciones significativas para el despliegue en el mundo real, tales como:
+    *   **Inferencia NMS-Free:** A diferencia de sus predecesores, elimina la necesidad de Non-Maximum Suppression (NMS), realizando predicciones directas (end-to-end) y agilizando la inferencia.
+    *   **Regresión DFL-Free:** Remueve la Distribution Focal Loss, reduciendo la complejidad de la cabeza de detección y facilitando la exportación a múltiples formatos de hardware.
+    *   **Optimizador MuSGD:** Utiliza un enfoque híbrido que estabiliza el entrenamiento combinando SGD estándar con técnicas Muon.
+    *   **ProgLoss & STAL:** Mejora la asignación de etiquetas y enfoca el entrenamiento en la inferencia, algo crucial para el correcto mapeo de cajas limitadoras.
 *   **Justificación de elección:** Anteriormente se experimentó con un modelo Baseline *Nano* (`yolo26n`), el cual arrojó un mAP50-95 de ~80.4% pero presentaba dificultades con los falsos negativos y texturas complejas (confusión con el *Background*). Posteriormente, se evaluó un entrenamiento adicional con la arquitectura *Small* (`yolo26s`) variando la resolución de las imágenes de entrada; si bien sus resultados mejoraron significativamente y fueron muy similares a los de arquitecturas más grandes, se determinó mantener la variante *Medium* (`yolo26m`) como el modelo definitivo para producción. La arquitectura *Medium* proporciona de forma inherente una mayor profundidad de red y capacidad paramétrica (sin depender de alteraciones extremas en la resolución de entrada), permitiendo extraer características robustas que corrigen sólidamente las debilidades del baseline a cambio de un aumento aceptable en el tiempo de inferencia.
 
 ## Evaluación del Modelo
