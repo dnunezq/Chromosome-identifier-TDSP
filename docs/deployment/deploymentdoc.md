@@ -2,7 +2,7 @@
 
 ## Infraestructura
 
-- **Nombre del modelo:** YOLOv8 (Ultralytics) para identificación de cromosomas (`best.pt` de `yolo_vertex_exp-7`).
+- **Nombre del modelo:** YOLOv26 (Ultralytics) para identificación de cromosomas (`best.pt` de `yolo_vertex_exp-7`).
 - **Plataforma de despliegue:** Contenedor Docker (Aplicación web con Flask).
 - **Requisitos técnicos:** 
   - Python 3.10-slim-bullseye.
