@@ -14,6 +14,7 @@
   - Se utiliza `secure_filename` y UUIDs únicos en los nombres de archivo para evitar inyecciones de rutas y sobreescrituras en las cargas de imágenes.
   - Filtro de extensiones permitidas para los archivos subidos (`.png`, `.jpg`, `.jpeg`, `.txt`).
 - **Diagrama de arquitectura:** Arquitectura Cliente-Servidor donde el usuario envía imágenes vía interfaz web (HTTP POST) y la aplicación Flask en el contenedor Docker ejecuta la inferencia localmente con Ultralytics YOLOv8, devolviendo las coordenadas (bounding boxes) y visualizándolas en el navegador.
+  ![architecture](https://github.com/dnunezq/Chromosome-identifier-TDSP/blob/main/data/architecture.png)
 
 ## Código de despliegue
 
